@@ -161,7 +161,7 @@ export class FFmpegService {
     console.log('Speed factor:', speedFactor, 'baseGifFps:', baseGifFps, 'fps:', fps);
     
     command.push(
-      '-filter_complex', `[0:v]fps=24,setpts=${speedFactor}*PTS[v]`,  // Adjust playback speed to match target FPS
+      '-filter_complex', `[0:v]fps=24,setpts=${speedFactor}*PTS,scale=trunc(iw/2)*2:trunc(ih/2)*2[v]`,
       '-map', '[v]',
       '-map', '1:a',
       '-c:v', 'libx264',
