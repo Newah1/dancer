@@ -1,0 +1,6 @@
+<div class="progress-container">
+  <div class="progress-bar">
+    <div class="progress-fill" [style.width.%]="currentProgress"></div>
+  </div>
+  <div class="progress-text">{{ currentProgress | number:'1.0-0' }}%</div>
+</div>

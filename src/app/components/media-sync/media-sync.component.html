@@ -1,0 +1,69 @@
+<!-- if the gifArrayBuffer is not null, show the gif player -->
+<div class="gif-section">
+  <!-- An upload box for gif file -->
+  <h1>Gif Music Sync</h1>
+  <h2>Sync your gif to music</h2>
+  @if(!generatingVideo) { @if (gifArrayBuffer) {
+  <div class="gif-player-container">
+    <app-gif-player
+      [gifArrayBuffer]="gifArrayBuffer"
+      [showControls]="true"
+      [showFps]="true"
+    ></app-gif-player>
+  </div>
+  }
+  <app-upload
+    class="gif-upload-box"
+    (fileUploaded)="onGifUploaded($event)"
+    [id]="'gif-upload-box'"
+    [mode]="gifArrayBuffer ? 'button' : 'drag-drop'"
+    [fileType]="'image/gif'"
+  >
+    <drag-text>Drag and drop your gif file here</drag-text>
+    <upload-button>
+      @if (gifArrayBuffer) { Change Gif } @else { Upload Gif }
+    </upload-button>
+  </app-upload>
+
+  @if (musicFile) {
+  <app-audio-player [audioFile]="musicFile"></app-audio-player>
+  }
+
+  <app-upload
+    class="music-upload-box"
+    (fileUploaded)="handleMusicFile($event)"
+    [fileType]="'audio/*'"
+    [mode]="musicFile ? 'button' : 'drag-drop'"
+    [id]="'music-upload-box'"
+  >
+    <contents>Drag and drop your file here</contents>
+    <drag-text>Drag and drop your music file here</drag-text>
+    <upload-button>
+      @if (musicFile) { Change Music } @else { Upload Music }
+    </upload-button>
+  </app-upload>
+  } @if (generatedVideoUrl) {
+  <div class="video-player-container">
+    <h3>Generated Video</h3>
+    <video
+      [src]="generatedVideoUrl"
+      controls
+      class="generated-video"
+      (error)="onVideoError($event)"
+    ></video>
+    <div class="video-actions">
+      <button (click)="downloadVideo()" class="download-button">
+        Download Video
+      </button>
+    </div>
+  </div>
+  } @if (generatingVideo) {
+  <app-progress-indicator></app-progress-indicator>
+  }
+</div>
+
+@if(musicFile && gifArrayBuffer) {
+<div class="generate-gif-container">
+  <button (click)="generateVideo()" [disabled]="generatingVideo">Generate Gif</button>
+</div>
+}

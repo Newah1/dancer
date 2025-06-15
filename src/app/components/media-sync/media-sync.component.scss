@@ -1,0 +1,141 @@
+.upload-box {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.drag-drop-tool {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  background: #f8f9fa;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    border-color: #007bff;
+    background: #e9ecef;
+  }
+
+  &.dragover {
+    border-color: #28a745;
+    background: #e8f5e9;
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  p {
+    margin-bottom: 1rem;
+    color: #666;
+  }
+
+  label {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+
+    &:hover {
+      background: #0056b3;
+    }
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+}
+
+
+
+.gif-player-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.gif-upload-box {
+  display: block;
+  margin-bottom: 2rem;
+}
+
+.gif-section {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.canvas-container {
+}
+#canvas {
+    min-width: 100px;
+    min-height: 100px;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.hidden {
+    display: none;
+}
+
+.waveform-container {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .waveform-canvas {
+        width: 100%;
+        height: 200px;
+        background: white;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+
+    .audio-controls {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+
+        
+    }
+}
+
+app-progress-indicator{
+  display: block;
+  margin-top: 2rem;
+}
+
+.generate-gif-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding: 1rem;
+}
+
+button {
+  padding: 1rem 2rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+  font-size: 1.5rem;
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+      background: #0056b3;
+  }
+}

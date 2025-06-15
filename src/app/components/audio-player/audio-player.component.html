@@ -1,0 +1,25 @@
+<div class="audio-player">
+  <audio 
+    #audioElement 
+    [src]="audioUrl" 
+    (timeupdate)="onTimeUpdate()"
+    (ended)="onEnded()"
+  ></audio>
+  
+  <app-waveform-visualizer
+    [audioUrl]="audioUrl"
+    [isPlaying]="isPlaying"
+    [currentTime]="currentTime"
+    [duration]="duration"
+    (seek)="handleSeekAdjustTime($event)"
+  ></app-waveform-visualizer>
+  
+  <div class="controls">
+    <button (click)="togglePlayPause()" class="play-pause-btn">
+      {{ isPlaying ? 'Pause' : 'Play' }}
+    </button>
+    <div class="current-timespan">
+      {{ currentTimespan }}
+    </div>
+  </div>
+</div>

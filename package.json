@@ -5,6 +5,7 @@
   "scripts": {
     "start": "nx serve",
     "build": "nx build",
+    "build:prod": "nx build --prod",
     "test": "nx test"
   },
   "private": true,
@@ -18,8 +19,17 @@
     "@angular/platform-server": "~19.2.0",
     "@angular/router": "~19.2.0",
     "@angular/ssr": "~19.2.0",
+    "@ffmpeg/core": "^0.12.10",
+    "@ffmpeg/core-mt": "^0.12.10",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
+    "@nx/vite": "^21.0.3",
     "express": "^4.21.2",
+    "gif-frames": "^1.0.1",
+    "gifuct-js": "^2.1.2",
+    "readable-stream": "^4.7.0",
     "rxjs": "~7.8.0",
+    "stream-browserify": "^3.0.0",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
@@ -61,7 +71,8 @@
     "ts-node": "10.9.1",
     "tslib": "^2.3.0",
     "typescript": "~5.7.2",
-    "typescript-eslint": "^8.19.0"
+    "typescript-eslint": "^8.19.0",
+    "vite-plugin-cross-origin-isolation": "^0.1.6"
   },
   "nx": {
     "includedScripts": []

@@ -1,0 +1,24 @@
+<div 
+    class="drag-drop-tool" 
+    [class.dragover]="dragging"
+    [class.button-mode]="mode() === 'button'"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)">
+
+    @if (mode() === 'drag-drop') {
+      <ng-content select="contents"></ng-content>
+      <ng-content select="drag-text" [class.hidden]="!dragging"></ng-content>
+    }
+
+    <label [for]="id()" class="upload-button">
+      <ng-content select="upload-button"></ng-content>
+    </label>
+    <input
+      type="file"
+      [id]="id()"
+      (change)="onFileChange($event)"
+      [accept]="fileType()"
+    />
+
+  </div>

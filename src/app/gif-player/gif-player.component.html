@@ -1,0 +1,13 @@
+<div class="gif-player-container" (wheel)="onScroll($event)">
+    <canvas id="canvas" #gifCanvas></canvas>
+    <div class="gif-player-controls" *ngIf="showControls()">
+        <input type="range" id="gif-speed" min="1" max="100" 
+        [value]="gifSpeedValue" 
+        orient="vertical"
+        (input)="onGifSpeedChange($event)" />
+    </div>
+    <div class="gif-player-fps" *ngIf="showFps()">
+        <p>FPS: </p>
+        <input type="text" id="gif-fps" [value]="gifSpeedValue" (input)="onGifSpeedChange($event)" />
+    </div>
+</div>

@@ -21,6 +21,21 @@
           {
             "glob": "**/*",
             "input": "public"
+          },
+          {
+            "glob": "worker.js",
+            "input": "node_modules/@ffmpeg/ffmpeg/dist/esm",
+            "output": "/"
+          },
+          {
+            "glob": "errors.js",
+            "input": "node_modules/@ffmpeg/ffmpeg/dist/esm",
+            "output": "/"
+          },
+          {
+            "glob": "const.js",
+            "input": "node_modules/@ffmpeg/ffmpeg/dist/esm",
+            "output": "/"
           }
         ],
         "styles": ["./src/styles.scss"],
@@ -29,10 +44,23 @@
         "ssr": {
           "entry": "src/server.ts"
         },
-        "outputMode": "server"
+        "outputMode": "server",
+        "allowedCommonJsDependencies": [
+          "@ffmpeg/core",
+          "@ffmpeg/ffmpeg",
+          "@ffmpeg/core-mt",
+          "@ffmpeg/util",
+          "ffmpeg-core.js"
+        ]
       },
       "configurations": {
         "production": {
+          "fileReplacements": [
+            {
+              "replace": "src/environments/environment.ts",
+              "with": "src/environments/environment.prod.ts"
+            }
+          ],
           "budgets": [
             {
               "type": "initial",
@@ -60,10 +88,18 @@
       "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
         "production": {
-          "buildTarget": "dancer:build:production"
+          "buildTarget": "dancer:build:production",
+          "headers": {
+            "Cross-Origin-Opener-Policy": "same-origin",
+            "Cross-Origin-Embedder-Policy": "require-corp"
+          }
         },
         "development": {
-          "buildTarget": "dancer:build:development"
+          "buildTarget": "dancer:build:development",
+          "headers": {
+            "Cross-Origin-Opener-Policy": "same-origin",
+            "Cross-Origin-Embedder-Policy": "require-corp"
+          }
         }
       },
       "defaultConfiguration": "development"

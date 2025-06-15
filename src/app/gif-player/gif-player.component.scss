@@ -1,0 +1,92 @@
+canvas {
+    max-width: 100%;
+    grid-area: canvas;
+}
+
+.gif-player-fps{
+    display: flex;
+    grid-area: gif-player-fps;
+    align-items: center;
+    padding: 5px 0;
+    &, input {
+        font-size: 16px;
+        font-weight: 600;
+    }
+}
+
+input#gif-fps{
+    border: none;
+    outline: none;
+    margin-top: 1px;
+    border-bottom: 1px solid #000;
+    
+    &:focus {
+        border-bottom: 1px solid #000;
+
+    }
+}
+
+input[type=range][orient=vertical] {
+    writing-mode: vertical-lr;
+    direction: rtl;
+    appearance: none; /* Changed from slider-vertical to none for better cross-browser support */
+    width: 40px;
+    vertical-align: bottom;
+    // height: 150px;
+    background: transparent;
+
+    /* Chrome specific thumb styling */
+    &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        border: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #666;
+        cursor: pointer;
+        margin-left: -8px; /* Center the thumb on the track */
+    }
+
+    /* Track styling */
+    &::-webkit-slider-runnable-track {
+        width: 12px;
+        height: 100%;
+        cursor: pointer;
+        background: #ddd;
+        border-radius: 6px;
+    }
+
+    /* Firefox specific thumb styling */
+    &::-moz-range-thumb {
+        border: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #666;
+        cursor: pointer;
+    }
+
+    /* Firefox track styling */
+    &::-moz-range-track {
+        width: 12px;
+        height: 100%;
+        cursor: pointer;
+        background: #ddd;
+        border-radius: 6px;
+    }
+}
+
+.gif-player-container {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 1fr 40px;
+    grid-template-areas: 
+        "canvas gif-player-controls"
+        "gif-player-fps gif-player-fps";
+}
+
+.gif-player-controls{
+    display: flex;
+    align-items: stretch;
+    grid-area: gif-player-controls;
+}
