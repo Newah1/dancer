@@ -35,9 +35,6 @@ export class WaveformVisualizerComponent implements AfterViewInit, OnChanges, On
   public isDraggingEnd = false;
   private readonly MIN_DURATION = 1; // Minimum duration in seconds
   private readonly PADDING = 20; // Padding on each side of the waveform
-  private readonly MIN_AMPLITUDE = 0.15; // Minimum amplitude to ensure quiet parts are visible
-  private readonly MAX_AMPLITUDE = 0.85; // Maximum amplitude to prevent clipping
-  private readonly NORMALIZATION_FACTOR = 0.95; // How much to normalize the waveform (0-1)
 
   constructor(private generateGifService: GenerateGifService) { }
 

@@ -1,8 +1,13 @@
 <!-- if the gifArrayBuffer is not null, show the gif player -->
 <div class="gif-section">
   <!-- An upload box for gif file -->
-  <h1>Gif Music Sync</h1>
-  <h2>Sync your gif to music</h2>
+  <div class="header">
+    <h1 style="margin-bottom: 5px;">Gif / Music Sync</h1>
+    <h3 style="margin-top: 0;">Sync your gif to music</h3>
+  </div>
+  <div class="icon" *ngIf="!generatingVideo">
+    <img src="gif-square_12355647.png" width="32" alt="Gif Icon" />
+  </div>
   @if(!generatingVideo) { @if (gifArrayBuffer) {
   <div class="gif-player-container">
     <app-gif-player
@@ -12,6 +17,7 @@
     ></app-gif-player>
   </div>
   }
+  
   <app-upload
     class="gif-upload-box"
     (fileUploaded)="onGifUploaded($event)"
@@ -25,10 +31,15 @@
     </upload-button>
   </app-upload>
 
+  <div class="icon">
+    <img src="volume_12334232.png" width="32" alt="Music Icon" />
+  </div>
   @if (musicFile) {
   <app-audio-player [audioFile]="musicFile"></app-audio-player>
   }
 
+ 
+  
   <app-upload
     class="music-upload-box"
     (fileUploaded)="handleMusicFile($event)"
@@ -36,7 +47,6 @@
     [mode]="musicFile ? 'button' : 'drag-drop'"
     [id]="'music-upload-box'"
   >
-    <contents>Drag and drop your file here</contents>
     <drag-text>Drag and drop your music file here</drag-text>
     <upload-button>
       @if (musicFile) { Change Music } @else { Upload Music }

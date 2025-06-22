@@ -1,0 +1,27 @@
+.footer {
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.8rem;
+    font-family: 'Arial', sans-serif;
+    font-weight: 400;
+    color: #666;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    font-weight: 400;
+}
