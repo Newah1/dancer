@@ -161,13 +161,21 @@ export class FFmpegService {
     console.log('Speed factor:', speedFactor, 'baseGifFps:', baseGifFps, 'fps:', fps);
     
     command.push(
-      '-filter_complex', `[0:v]fps=24,setpts=${speedFactor}*PTS,scale=trunc(iw/2)*2:trunc(ih/2)*2[v]`,
+      '-filter_complex', `[0:v]fps=24,setpts=${speedFactor}*PTS,scale=trunc(iw/2)*2:trunc(ih/2)*2,format=yuv420p[v]`,
       '-map', '[v]',
       '-map', '1:a',
       '-c:v', 'libx264',
+      '-preset', 'ultrafast',
+      '-tune', 'fastdecode',
+      '-profile:v', 'baseline',
+      '-level', '3.0',
+      '-crf', '30',
+      '-maxrate', '1M',
+      '-bufsize', '1M',
+      '-threads', '2',           // Limit thread count for mobile
       '-c:a', 'aac',
+      '-b:a', '96k',            // Lower audio bitrate
       '-shortest',
-      '-pix_fmt', 'yuv420p',
       'output.mp4'
     );
 

@@ -1,3 +1,20 @@
+<div class="timestamp-inputs">
+  <input 
+    type="text" 
+    [value]="formatTime(startBracketTime)" 
+    (input)="onStartTimeInput($event)"
+    class="timestamp-input"
+    [class.active]="isDraggingStart"
+  >
+  <input 
+    type="text" 
+    [value]="formatTime(endBracketTime)" 
+    (input)="onEndTimeInput($event)"
+    class="timestamp-input"
+    [class.active]="isDraggingEnd"
+  >
+</div>
+
 <div class="waveform-container">
   <canvas #canvas></canvas>
 </div>

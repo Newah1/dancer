@@ -29,10 +29,10 @@ export class WaveformVisualizerComponent implements AfterViewInit, OnChanges, On
   private waveformData: { min: number; max: number }[] = [];
   
   // New properties for bracket positions
-  private startBracketTime = 0;
-  private endBracketTime = 0;
-  private isDraggingStart = false;
-  private isDraggingEnd = false;
+  public startBracketTime = 0;
+  public endBracketTime = 0;
+  public isDraggingStart = false;
+  public isDraggingEnd = false;
   private readonly MIN_DURATION = 1; // Minimum duration in seconds
   private readonly PADDING = 20; // Padding on each side of the waveform
   private readonly MIN_AMPLITUDE = 0.15; // Minimum amplitude to ensure quiet parts are visible
@@ -59,10 +59,12 @@ export class WaveformVisualizerComponent implements AfterViewInit, OnChanges, On
       }
     }
     if (changes['duration'] && changes['duration'].currentValue) {
-      // Initialize bracket positions when duration is set
-      this.startBracketTime = 0;
-      this.endBracketTime = changes['duration'].currentValue;
-      this.drawWaveform();
+      // Only initialize bracket positions if they haven't been set yet
+      if (this.startBracketTime === 0 && this.endBracketTime === 0) {
+        this.startBracketTime = 0;
+        this.endBracketTime = changes['duration'].currentValue;
+        this.drawWaveform();
+      }
     }
     if (changes['currentTime']) {
       // Enforce playback boundaries
@@ -101,6 +103,11 @@ export class WaveformVisualizerComponent implements AfterViewInit, OnChanges, On
         canvas.width = this.canvasWidth;
         canvas.height = this.canvasHeight;
         
+        // Reprocess waveform data for new width
+        if (this.audioBuffer) {
+          this.processWaveformData();
+        }
+        
         this.drawWaveform();
       }
     });
@@ -120,10 +127,12 @@ export class WaveformVisualizerComponent implements AfterViewInit, OnChanges, On
       const arrayBuffer = await response.arrayBuffer();
       this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
 
-      // Set duration and bracket times before drawing
+      // Set duration and bracket times before drawing, but only if they haven't been set
       this.duration = this.audioBuffer.duration;
-      this.startBracketTime = 0;
-      this.endBracketTime = this.duration;
+      if (this.startBracketTime === 0 && this.endBracketTime === 0) {
+        this.startBracketTime = 0;
+        this.endBracketTime = this.duration;
+      }
 
       // Pre-process the waveform data
       this.processWaveformData();
@@ -335,42 +344,30 @@ export class WaveformVisualizerComponent implements AfterViewInit, OnChanges, On
   private setupClickHandler() {
     const canvas = this.canvas.nativeElement;
     
-    // Initialize bracket positions when duration changes
-    this.ngOnChanges({
-      duration: {
-        currentValue: this.duration,
-        previousValue: 0,
-        firstChange: true,
-        isFirstChange: () => true
-      }
-    } as SimpleChanges);
-
-    canvas.addEventListener('mousemove', (event: MouseEvent) => {
+    const handleMove = (clientX: number) => {
       const rect = canvas.getBoundingClientRect();
-      const x = event.clientX - rect.left;
+      const x = clientX - rect.left;
       
       this.updateCursorStyle(canvas, x);
       
       if (this.isDraggingStart || this.isDraggingEnd) {
         this.handleBracketDrag(x);
       }
-    });
+    };
 
-    canvas.addEventListener('mousedown', (event: MouseEvent) => {
+    const handleStart = (clientX: number) => {
       const rect = canvas.getBoundingClientRect();
-      const x = event.clientX - rect.left;
+      const x = clientX - rect.left;
       const clickPosition = x / this.canvasWidth;
       const clickTime = clickPosition * this.duration;
 
       if (this.isNearBracket(x, this.startBracketTime)) {
         this.isDraggingStart = true;
-        event.preventDefault();
         return;
       }
 
       if (this.isNearBracket(x, this.endBracketTime)) {
         this.isDraggingEnd = true;
-        event.preventDefault();
         return;
       }
 
@@ -378,18 +375,46 @@ export class WaveformVisualizerComponent implements AfterViewInit, OnChanges, On
       if (clickTime >= this.startBracketTime && clickTime <= this.endBracketTime) {
         this.seek.emit(clickTime);
       }
-    });
+    };
 
-    canvas.addEventListener('mouseup', () => {
+    const handleEnd = () => {
       this.isDraggingStart = false;
       this.isDraggingEnd = false;
+    };
+
+    // Mouse events
+    canvas.addEventListener('mousemove', (event: MouseEvent) => {
+      handleMove(event.clientX);
     });
 
+    canvas.addEventListener('mousedown', (event: MouseEvent) => {
+      handleStart(event.clientX);
+      event.preventDefault();
+    });
+
+    canvas.addEventListener('mouseup', handleEnd);
     canvas.addEventListener('mouseleave', () => {
-      this.isDraggingStart = false;
-      this.isDraggingEnd = false;
+      handleEnd();
       canvas.style.cursor = 'default';
     });
+
+    // Touch events
+    canvas.addEventListener('touchmove', (event: TouchEvent) => {
+      event.preventDefault(); // Prevent scrolling while dragging
+      if (event.touches.length > 0) {
+        handleMove(event.touches[0].clientX);
+      }
+    }, { passive: false });
+
+    canvas.addEventListener('touchstart', (event: TouchEvent) => {
+      event.preventDefault(); // Prevent default touch behavior
+      if (event.touches.length > 0) {
+        handleStart(event.touches[0].clientX);
+      }
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', handleEnd);
+    canvas.addEventListener('touchcancel', handleEnd);
   }
 
   ngOnDestroy() {
@@ -400,5 +425,48 @@ export class WaveformVisualizerComponent implements AfterViewInit, OnChanges, On
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
     }
+  }
+
+  // Add timestamp formatting method
+  public formatTime(seconds: number): string {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  // Add timestamp input handlers
+  public onStartTimeInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const time = this.parseTimeInput(input.value);
+    if (time !== null && time >= 0 && time <= this.endBracketTime - this.MIN_DURATION) {
+      this.startBracketTime = time;
+      this.startTimeChange.emit(this.startBracketTime);
+      this.drawWaveform();
+      this.updateGifGenerationParams();
+    }
+  }
+
+  public onEndTimeInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const time = this.parseTimeInput(input.value);
+    if (time !== null && time <= this.duration && time >= this.startBracketTime + this.MIN_DURATION) {
+      this.endBracketTime = time;
+      this.endTimeChange.emit(this.endBracketTime);
+      this.drawWaveform();
+      this.updateGifGenerationParams();
+    }
+  }
+
+  private parseTimeInput(input: string): number | null {
+    // Handle MM:SS format
+    const match = input.match(/^(\d+):(\d{2})$/);
+    if (match) {
+      const minutes = parseInt(match[1], 10);
+      const seconds = parseInt(match[2], 10);
+      if (seconds < 60) {
+        return minutes * 60 + seconds;
+      }
+    }
+    return null;
   }
 }

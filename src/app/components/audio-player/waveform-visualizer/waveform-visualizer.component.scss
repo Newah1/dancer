@@ -16,3 +16,29 @@
     height: 100%;
   }
 }
+
+.timestamp-inputs {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  margin-bottom: 8px;
+}
+
+.timestamp-input {
+  width: 80px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: monospace;
+  text-align: center;
+  background: white;
+  
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+  }
+  
+  &.active {
+    border-color: #ff0000;
+  }
+}
