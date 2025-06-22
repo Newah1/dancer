@@ -7,6 +7,7 @@ import { GenerateGifService } from '../../services/generate-gif.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { AudioPlayerComponent } from "../audio-player/audio-player.component";
 import { ProgressIndicatorComponent } from "../progress-indicator.component";
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-media-sync',
@@ -25,7 +26,6 @@ export class MediaSyncComponent {
 
     gifArrayBuffer: ArrayBuffer | null = null;
     musicFile: File | null = null;
-    generatedVideoUrl: SafeUrl | null = null;
     private generatedVideoBlob: Blob | null = null;
     audioUrl: string | null = null;
     currentTime = 0;
@@ -36,7 +36,8 @@ export class MediaSyncComponent {
 
     constructor(
         private generateGifService: GenerateGifService,
-        private sanitizer: DomSanitizer
+        private sanitizer: DomSanitizer,
+        private router: Router
     ) {}
 
     async onGifUploaded(event: FileUploadEvent): Promise<void> {
@@ -73,12 +74,13 @@ export class MediaSyncComponent {
             this.generatedVideoBlob = await this.generateGifService.generateGif(gifFile);
             this.generatingVideo = false;
 
-            // Create a safe URL for the video
-            this.generatedVideoUrl = this.sanitizer.bypassSecurityTrustUrl(
-                URL.createObjectURL(this.generatedVideoBlob)
-            );
+            // Create a URL for the video and navigate to complete page
+            const videoUrl = URL.createObjectURL(this.generatedVideoBlob);
+            const encodedUrl = encodeURIComponent(videoUrl);
+            this.router.navigate(['/complete', encodedUrl]);
         } catch (error) {
             console.error('Error generating video:', error);
+            this.generatingVideo = false;
             // Handle error appropriately
         }
     }

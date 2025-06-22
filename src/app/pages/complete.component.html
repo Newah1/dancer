@@ -1,0 +1,28 @@
+<div class="complete-container">
+  <div class="header">
+    <h1>🎉 Your GIF is Ready!</h1>
+    <p>Your synchronized GIF and music video has been generated successfully.</p>
+  </div>
+
+  @if (generatedVideoUrl) {
+    <div class="video-player-container">
+      <video
+        [src]="generatedVideoUrl"
+        controls
+        class="generated-video"
+        (error)="onVideoError($event)"
+      ></video>
+      <div class="video-actions">
+        <button (click)="downloadVideo()" class="download-button">
+          📥 Download Video
+        </button>
+      </div>
+    </div>
+  }
+
+  <div class="actions">
+    <button (click)="tryAgain()" class="try-again-button">
+      🎬 Create Another GIF
+    </button>
+  </div>
+</div>
