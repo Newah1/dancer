@@ -52,10 +52,37 @@ app.use(
 app.use('/**', (req, res, next) => {
   angularApp
     .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next()
-    )
-    .catch(next);
+    .then((response) => {
+      if (response) {
+        // Check if this is a 404 route
+        const url = req.url;
+        if (url && !url.startsWith('/api') && !url.includes('.')) {
+          // Check for the global HTTP status property set by Angular
+          const globalStatus = (global as any).__ANGULAR_HTTP_STATUS__;
+          if (globalStatus === 404) {
+            res.status(404);
+            // Clear the status after using it
+            delete (global as any).__ANGULAR_HTTP_STATUS__;
+          }
+          
+          // Also check the response body for 404 indicators
+          const responseText = response.body?.toString() || '';
+          if (responseText.includes('Page Not Found') || responseText.includes('404')) {
+            res.status(404);
+          }
+        }
+        writeResponseToNodeResponse(response, res);
+      } else {
+        // No response means 404
+        res.status(404);
+        res.send('Page not found');
+      }
+    })
+    .catch((error) => {
+      console.error('Error handling request:', error);
+      res.status(500);
+      res.send('Internal server error');
+    });
 });
 
 /**

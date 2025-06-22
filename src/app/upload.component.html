@@ -7,6 +7,7 @@
     (drop)="onDrop($event)">
 
     @if (mode() === 'drag-drop') {
+      <ng-content select="icon"></ng-content>
       <ng-content select="contents"></ng-content>
       <ng-content select="drag-text" [class.hidden]="!dragging"></ng-content>
     }
