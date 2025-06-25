@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { SeoDirective } from '../../directives/seo.directive';
 
 @Component({
   selector: 'app-complete',
-  imports: [CommonModule],
+  imports: [CommonModule, SeoDirective],
   templateUrl: './complete.component.html',
   styleUrl: './complete.component.scss',
 })

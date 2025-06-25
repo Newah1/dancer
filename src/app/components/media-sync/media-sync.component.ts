@@ -4,14 +4,15 @@ import { FileUploadEvent, UploadComponent } from "src/app/upload.component";
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { GifPlayerComponent } from "src/app/gif-player/gif-player.component";
 import { GenerateGifService } from '../../services/generate-gif.service';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { AudioPlayerComponent } from "../audio-player/audio-player.component";
 import { ProgressIndicatorComponent } from "../progress-indicator.component";
 import { Router } from '@angular/router';
+import { SeoDirective } from '../../directives/seo.directive';
 
 @Component({
     selector: 'app-media-sync',
-    imports: [CommonModule, UploadComponent, GifPlayerComponent, AudioPlayerComponent, ProgressIndicatorComponent],
+    imports: [CommonModule, UploadComponent, GifPlayerComponent, AudioPlayerComponent, ProgressIndicatorComponent, SeoDirective],
     schemas: [NO_ERRORS_SCHEMA],
     templateUrl: './media-sync.component.html',
     styleUrls: ['./media-sync.component.scss']

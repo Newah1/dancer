@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { SeoService } from './services/seo.service';
 
 @Component({
   selector: 'app-root',
@@ -21,8 +22,15 @@ import { RouterOutlet } from '@angular/router';
     }
   `]
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'dancer';
+
+  constructor(private seoService: SeoService) {}
+
+  ngOnInit(): void {
+    // Initialize with default SEO data
+    this.seoService.resetToDefault();
+  }
 
   getCurrentYear(): number {
     return new Date().getFullYear();

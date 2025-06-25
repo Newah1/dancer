@@ -1,7 +1,7 @@
 import { Route } from '@angular/router';
 import { MediaSyncComponent } from './components/media-sync/media-sync.component';
-import { CompleteComponent } from './pages/complete.component';
-import { FourohfourComponent } from './pages/fourohfour.component';
+import { CompleteComponent } from './pages/complete/complete.component';
+import { FourohfourComponent } from './pages/404/fourohfour.component';
 
 export const appRoutes: Route[] = [
     { path: '', component: MediaSyncComponent },
