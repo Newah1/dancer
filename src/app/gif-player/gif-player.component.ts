@@ -33,6 +33,7 @@ export class GifPlayerComponent implements OnInit {
   private currentFrameIndex = 0;
   protected gifSpeedValue = 20;
   private lastWheelDelta = 0;
+  private previousFrame: ParsedFrame | null = null;
 
   constructor(private generateGifService: GenerateGifService) {
     effect(() => {
@@ -49,6 +50,7 @@ export class GifPlayerComponent implements OnInit {
     }
 
     this.resetGif();
+    setTimeout(() => this.updateSliderIndicatorPosition(), 0);
   }
 
   resetGif(): void {
@@ -59,6 +61,7 @@ export class GifPlayerComponent implements OnInit {
     this.imageData = null;
     this.frames = [];
     this.interval = null;
+    this.previousFrame = null;
     const buffer = this.gifArrayBuffer();
     if (buffer) {
       const gif = parseGIF(buffer);
@@ -77,21 +80,18 @@ export class GifPlayerComponent implements OnInit {
   }
 
   onGifSpeedChange(event: Event): void {
-
     const value = parseInt((event.target as HTMLInputElement).value);
-
     // if nan, set to 1
     if (isNaN(value)) {
       this.gifSpeedValue = 1;
     } else {
       this.gifSpeedValue = value;
     }
-
     console.log('gifSpeedValue', this.gifSpeedValue);
-
     this.stopGif();
     this.playGif();
     this.updateGifGenerationParams();
+    this.updateSliderIndicatorPosition();
   }
 
   private async updateGifGenerationParams() {
@@ -125,34 +125,77 @@ export class GifPlayerComponent implements OnInit {
   private playGif(): void {
     this.stopGif();
     const context = this.tempCanvas?.getContext('2d');
-    if (!context) {
+    const mainContext = this.gifCanvas()?.nativeElement.getContext('2d');
+    if (!context || !mainContext) {
       throw new Error('Failed to get canvas context');
     }
 
     let frameIndex = this.currentFrameIndex;
-    let needsDisposal = false;
 
     this.interval = setInterval(() => {
-      if (needsDisposal) {
-        context.clearRect(
-          0,
-          0,
-          this.gifCanvas()?.nativeElement.width ?? 0,
-          this.gifCanvas()?.nativeElement.height ?? 0
-        );
-        needsDisposal = false;
-      }
-
       const frame = this.frames[frameIndex];
       const dims = frame.dims;
 
-      this.updateCanvasDimensions(context, dims);
-      this.drawFrame(context, frame, dims);
+      // Handle disposal of previous frame
+      if (this.previousFrame) {
+        this.handleDisposal(mainContext, this.previousFrame, dims);
+      }
 
+      this.updateCanvasDimensions(context, dims);
+      this.drawFrame(context, frame, dims, mainContext);
+
+      this.previousFrame = frame;
       frameIndex = (frameIndex + 1) % this.frames.length;
-      needsDisposal = frame.disposalType === 2;
       this.currentFrameIndex = frameIndex;
     }, 1000 / this.gifSpeedValue);
+  }
+
+  /**
+   * Handles GIF disposal methods for proper frame transitions
+   */
+  private handleDisposal(
+    mainContext: CanvasRenderingContext2D,
+    previousFrame: ParsedFrame,
+    currentDims: GifDimensions
+  ): void {
+    const canvas = mainContext.canvas;
+    
+    switch (previousFrame.disposalType) {
+      case 0: // No disposal specified
+        // Keep the previous frame
+        break;
+      case 1: // Do not dispose
+        // Keep the previous frame
+        break;
+      case 2: // Restore to background color
+        // Clear the area of the previous frame to background color
+        mainContext.clearRect(
+          previousFrame.dims.left,
+          previousFrame.dims.top,
+          previousFrame.dims.width,
+          previousFrame.dims.height
+        );
+        break;
+      case 3: // Restore to previous content
+        // This is complex and not fully supported in most GIFs
+        // For now, we'll clear the area
+        mainContext.clearRect(
+          previousFrame.dims.left,
+          previousFrame.dims.top,
+          previousFrame.dims.width,
+          previousFrame.dims.height
+        );
+        break;
+      default:
+        // Unknown disposal method, clear the area
+        mainContext.clearRect(
+          previousFrame.dims.left,
+          previousFrame.dims.top,
+          previousFrame.dims.width,
+          previousFrame.dims.height
+        );
+        break;
+    }
   }
 
    /**
@@ -212,19 +255,33 @@ export class GifPlayerComponent implements OnInit {
   private drawFrame(
     context: CanvasRenderingContext2D,
     frame: ParsedFrame,
-    dims: GifDimensions
+    dims: GifDimensions,
+    mainContext: CanvasRenderingContext2D
   ): void {
     if (!this.imageData || !this.tempCanvas) return;
 
+    // Clear the temp canvas first
+    context.clearRect(0, 0, dims.width, dims.height);
+    
+    // Set the frame data
     this.imageData.data.set(frame.patch);
     context.putImageData(this.imageData, 0, 0);
 
-    const canvas = this.gifCanvas()?.nativeElement;
-    if (!canvas) return;
+    // Draw the temp canvas onto the main canvas at the correct position
+    mainContext.drawImage(this.tempCanvas, dims.left, dims.top);
+  }
 
-    const mainContext = canvas.getContext('2d');
-    if (mainContext) {
-      mainContext.drawImage(this.tempCanvas, dims.left, dims.top);
+  private updateSliderIndicatorPosition(): void {
+    // Find the slider container and set the --slider-value CSS variable
+    const slider = document.getElementById('gif-speed') as HTMLInputElement;
+    if (slider && slider.parentElement) {
+      // Calculate percent (0-100)
+      const min = parseInt(slider.min) || 1;
+      const max = parseInt(slider.max) || 100;
+      const value = parseInt(slider.value) || min;
+      // Invert for vertical slider (top is max, bottom is min)
+      const percent = 100 - ((value - min) / (max - min)) * 100;
+      slider.parentElement.style.setProperty('--slider-value', percent.toString());
     }
   }
 }
