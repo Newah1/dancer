@@ -1,7 +1,8 @@
-import { Directive, Input, OnInit, OnDestroy } from '@angular/core';
+import { Directive, Input, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { isPlatformBrowser } from '@angular/common';
 import { SeoService } from '../services/seo.service';
 import { SeoData } from '../types/seo.types';
 
@@ -21,22 +22,25 @@ export class SeoDirective implements OnInit, OnDestroy {
 
   constructor(
     private seoService: SeoService,
-    private router: Router
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: object
   ) {}
 
   ngOnInit(): void {
-    // Apply SEO data immediately
+    // Apply SEO data immediately (works on both server and client)
     this.applySeoData();
 
-    // Listen for route changes to reapply SEO data
-    this.router.events
-      .pipe(
-        filter(event => event instanceof NavigationEnd),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(() => {
-        this.applySeoData();
-      });
+    // Listen for route changes to reapply SEO data (client-side only)
+    if (isPlatformBrowser(this.platformId)) {
+      this.router.events
+        .pipe(
+          filter(event => event instanceof NavigationEnd),
+          takeUntil(this.destroy$)
+        )
+        .subscribe(() => {
+          this.applySeoData();
+        });
+    }
   }
 
   ngOnDestroy(): void {

@@ -28,10 +28,6 @@ export class SeoService {
    * Update SEO data for the current page
    */
   updateSeoData(seoData: SeoData): void {
-    if (!isPlatformBrowser(this.platformId)) {
-      return; // Don't update meta tags on server-side
-    }
-
     // Update title
     if (seoData.title) {
       this.title.setTitle(seoData.title);
@@ -69,11 +65,13 @@ export class SeoService {
     this.updateMetaTag('name', 'apple-mobile-web-app-status-bar-style', seoData.appleMobileWebAppStatusBarStyle);
     this.updateMetaTag('name', 'apple-mobile-web-app-title', seoData.appleMobileWebAppTitle);
 
-    // Update canonical URL
-    this.updateCanonicalUrl(seoData.canonicalUrl);
+    // Update canonical URL (only on client-side)
+    if (isPlatformBrowser(this.platformId)) {
+      this.updateCanonicalUrl(seoData.canonicalUrl);
+    }
 
-    // Update structured data
-    if (seoData.structuredData) {
+    // Update structured data (only on client-side)
+    if (isPlatformBrowser(this.platformId) && seoData.structuredData) {
       this.updateStructuredData(seoData.structuredData);
     }
   }
@@ -147,7 +145,7 @@ export class SeoService {
    * Update canonical URL
    */
   private updateCanonicalUrl(url?: string): void {
-    if (!url) return;
+    if (!url || !isPlatformBrowser(this.platformId)) return;
 
     // Remove existing canonical link
     const existingCanonical = document.querySelector('link[rel="canonical"]');
@@ -166,6 +164,8 @@ export class SeoService {
    * Update structured data
    */
   private updateStructuredData(data: any): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     // Remove existing structured data
     const existingScripts = document.querySelectorAll('script[type="application/ld+json"]');
     existingScripts.forEach(script => script.remove());
@@ -232,5 +232,270 @@ export class SeoService {
    */
   getDefaultConfig(): DefaultSeoConfig {
     return { ...this.defaultConfig };
+  }
+
+  /**
+   * Generate meta tags as HTML string for server-side rendering
+   */
+  generateMetaTagsHtml(seoData: SeoData): string {
+    const tags: string[] = [];
+
+    // Title tag
+    if (seoData.title) {
+      tags.push(`<title>${this.escapeHtml(seoData.title)}</title>`);
+    }
+
+    // Primary meta tags
+    if (seoData.description) {
+      tags.push(`<meta name="description" content="${this.escapeHtml(seoData.description)}">`);
+    }
+    if (seoData.keywords) {
+      tags.push(`<meta name="keywords" content="${this.escapeHtml(seoData.keywords)}">`);
+    }
+    if (seoData.author) {
+      tags.push(`<meta name="author" content="${this.escapeHtml(seoData.author)}">`);
+    }
+    if (seoData.robots) {
+      tags.push(`<meta name="robots" content="${this.escapeHtml(seoData.robots)}">`);
+    }
+
+    // Open Graph tags
+    if (seoData.ogType) {
+      tags.push(`<meta property="og:type" content="${this.escapeHtml(seoData.ogType)}">`);
+    }
+    if (seoData.ogUrl) {
+      tags.push(`<meta property="og:url" content="${this.escapeHtml(seoData.ogUrl)}">`);
+    }
+    if (seoData.ogTitle) {
+      tags.push(`<meta property="og:title" content="${this.escapeHtml(seoData.ogTitle)}">`);
+    }
+    if (seoData.ogDescription) {
+      tags.push(`<meta property="og:description" content="${this.escapeHtml(seoData.ogDescription)}">`);
+    }
+    if (seoData.ogImage) {
+      tags.push(`<meta property="og:image" content="${this.escapeHtml(seoData.ogImage)}">`);
+    }
+    if (seoData.ogSiteName) {
+      tags.push(`<meta property="og:site_name" content="${this.escapeHtml(seoData.ogSiteName)}">`);
+    }
+    if (seoData.ogLocale) {
+      tags.push(`<meta property="og:locale" content="${this.escapeHtml(seoData.ogLocale)}">`);
+    }
+
+    // Twitter tags
+    if (seoData.twitterCard) {
+      tags.push(`<meta property="twitter:card" content="${this.escapeHtml(seoData.twitterCard)}">`);
+    }
+    if (seoData.twitterUrl) {
+      tags.push(`<meta property="twitter:url" content="${this.escapeHtml(seoData.twitterUrl)}">`);
+    }
+    if (seoData.twitterTitle) {
+      tags.push(`<meta property="twitter:title" content="${this.escapeHtml(seoData.twitterTitle)}">`);
+    }
+    if (seoData.twitterDescription) {
+      tags.push(`<meta property="twitter:description" content="${this.escapeHtml(seoData.twitterDescription)}">`);
+    }
+    if (seoData.twitterImage) {
+      tags.push(`<meta property="twitter:image" content="${this.escapeHtml(seoData.twitterImage)}">`);
+    }
+
+    // Additional meta tags
+    if (seoData.themeColor) {
+      tags.push(`<meta name="theme-color" content="${this.escapeHtml(seoData.themeColor)}">`);
+    }
+    if (seoData.msTileColor) {
+      tags.push(`<meta name="msapplication-TileColor" content="${this.escapeHtml(seoData.msTileColor)}">`);
+    }
+    if (seoData.appleMobileWebAppCapable) {
+      tags.push(`<meta name="apple-mobile-web-app-capable" content="${this.escapeHtml(seoData.appleMobileWebAppCapable)}">`);
+    }
+    if (seoData.appleMobileWebAppStatusBarStyle) {
+      tags.push(`<meta name="apple-mobile-web-app-status-bar-style" content="${this.escapeHtml(seoData.appleMobileWebAppStatusBarStyle)}">`);
+    }
+    if (seoData.appleMobileWebAppTitle) {
+      tags.push(`<meta name="apple-mobile-web-app-title" content="${this.escapeHtml(seoData.appleMobileWebAppTitle)}">`);
+    }
+
+    // Canonical URL
+    if (seoData.canonicalUrl) {
+      tags.push(`<link rel="canonical" href="${this.escapeHtml(seoData.canonicalUrl)}">`);
+    }
+
+    // Structured data
+    if (seoData.structuredData) {
+      tags.push(`<script type="application/ld+json">${JSON.stringify(seoData.structuredData)}</script>`);
+    }
+
+    return tags.join('\n    ');
+  }
+
+  /**
+   * Escape HTML content to prevent XSS
+   */
+  private escapeHtml(text: string): string {
+    if (!isPlatformBrowser(this.platformId)) {
+      // Server-side HTML escaping
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    } else {
+      // Client-side HTML escaping
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  }
+
+  /**
+   * Inject meta tags into document head for server-side rendering
+   * This method should be called during SSR to inject dynamic meta tags
+   */
+  injectMetaTagsForSSR(seoData: SeoData): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      // For server-side rendering, we need to inject meta tags into the document
+      // This would typically be done through Angular's TransferState or similar mechanism
+      // For now, we'll use the existing Angular Meta service which works on both platforms
+      this.updateSeoData(seoData);
+    }
+  }
+
+  /**
+   * Get SEO data for a specific route (useful for server-side rendering)
+   */
+  getSeoDataForRoute(routePath: string): SeoData {
+    // Default SEO data based on route
+    switch (routePath) {
+      case '/':
+        return {
+          title: 'Dancer - Media Synchronization Tool',
+          description: 'Professional media synchronization tool for creating perfectly timed GIFs and videos with audio. Sync your media files effortlessly.',
+          keywords: 'media sync, gif creation, video editing, audio synchronization, media tools, web application',
+          ogType: 'website',
+          ogUrl: 'https://dancer-app.com/',
+          ogTitle: 'Dancer - Media Synchronization Tool',
+          ogDescription: 'Professional media synchronization tool for creating perfectly timed GIFs and videos with audio. Sync your media files effortlessly.',
+          ogImage: 'https://dancer-app.com/assets/og-image.jpg',
+          twitterCard: 'summary_large_image',
+          twitterTitle: 'Dancer - Media Synchronization Tool',
+          twitterDescription: 'Professional media synchronization tool for creating perfectly timed GIFs and videos with audio. Sync your media files effortlessly.',
+          twitterImage: 'https://dancer-app.com/assets/twitter-image.jpg',
+          canonicalUrl: 'https://dancer-app.com/'
+        };
+      case '/complete':
+        return {
+          title: 'Video Generation Complete - Dancer',
+          description: 'Your synchronized GIF and music video has been generated successfully. Download your creation or create another one.',
+          keywords: 'video generation, gif sync complete, download video, synchronized video, music video',
+          ogType: 'website',
+          ogUrl: 'https://dancer-app.com/complete',
+          ogTitle: 'Video Generation Complete - Dancer',
+          ogDescription: 'Your synchronized GIF and music video has been generated successfully. Download your creation or create another one.',
+          ogImage: 'https://dancer-app.com/assets/og-image.jpg',
+          twitterCard: 'summary_large_image',
+          twitterTitle: 'Video Generation Complete - Dancer',
+          twitterDescription: 'Your synchronized GIF and music video has been generated successfully. Download your creation or create another one.',
+          twitterImage: 'https://dancer-app.com/assets/twitter-image.jpg',
+          canonicalUrl: 'https://dancer-app.com/complete'
+        };
+      default:
+        // For dynamic routes (like /gif/:id)
+        if (routePath.startsWith('/gif/')) {
+          return {
+            title: 'Custom GIF - Dancer',
+            description: 'View and sync this custom GIF with music using Dancer\'s professional media synchronization tool.',
+            keywords: 'custom gif, gif sync, music sync, video creation, animation sync',
+            ogType: 'website',
+            ogUrl: `https://dancer-app.com${routePath}`,
+            ogTitle: 'Custom GIF - Dancer',
+            ogDescription: 'View and sync this custom GIF with music using Dancer\'s professional media synchronization tool.',
+            ogImage: 'https://dancer-app.com/assets/og-image.jpg',
+            twitterCard: 'summary_large_image',
+            twitterTitle: 'Custom GIF - Dancer',
+            twitterDescription: 'View and sync this custom GIF with music using Dancer\'s professional media synchronization tool.',
+            twitterImage: 'https://dancer-app.com/assets/twitter-image.jpg',
+            canonicalUrl: `https://dancer-app.com${routePath}`
+          };
+        }
+        return {
+          title: 'Dancer - Media Synchronization Tool',
+          description: 'Professional media synchronization tool for creating perfectly timed GIFs and videos with audio. Sync your media files effortlessly.',
+          keywords: 'media sync, gif creation, video editing, audio synchronization, media tools, web application',
+          ogType: 'website',
+          ogUrl: 'https://dancer-app.com/',
+          ogTitle: 'Dancer - Media Synchronization Tool',
+          ogDescription: 'Professional media synchronization tool for creating perfectly timed GIFs and videos with audio. Sync your media files effortlessly.',
+          ogImage: 'https://dancer-app.com/assets/og-image.jpg',
+          twitterCard: 'summary_large_image',
+          twitterTitle: 'Dancer - Media Synchronization Tool',
+          twitterDescription: 'Professional media synchronization tool for creating perfectly timed GIFs and videos with audio. Sync your media files effortlessly.',
+          twitterImage: 'https://dancer-app.com/assets/twitter-image.jpg',
+          canonicalUrl: 'https://dancer-app.com/'
+        };
+    }
+  }
+
+  /**
+   * Resolve SEO data for dynamic routes with parameters
+   * This method can be used by route resolvers to get SEO data before component initialization
+   */
+  resolveSeoDataForRoute(routePath: string, routeParams?: any): SeoData {
+    const baseSeoData = this.getSeoDataForRoute(routePath);
+    
+    // Handle dynamic route parameters
+    if (routePath.startsWith('/gif/') && routeParams?.id) {
+      // You could fetch additional data about the GIF here
+      // For now, we'll use the base data with the specific ID
+      return {
+        ...baseSeoData,
+        title: `GIF ${routeParams.id} - Dancer`,
+        description: `View and sync GIF ${routeParams.id} with music using Dancer's professional media synchronization tool.`,
+        ogTitle: `GIF ${routeParams.id} - Dancer`,
+        ogDescription: `View and sync GIF ${routeParams.id} with music using Dancer's professional media synchronization tool.`,
+        twitterTitle: `GIF ${routeParams.id} - Dancer`,
+        twitterDescription: `View and sync GIF ${routeParams.id} with music using Dancer's professional media synchronization tool.`
+      };
+    }
+    
+    if (routePath.startsWith('/complete/') && routeParams?.videoUrl) {
+      return {
+        ...baseSeoData,
+        title: 'Video Generation Complete - Dancer',
+        description: 'Your synchronized GIF and music video has been generated successfully. Download your creation or create another one.',
+        ogTitle: 'Video Generation Complete - Dancer',
+        ogDescription: 'Your synchronized GIF and music video has been generated successfully. Download your creation or create another one.',
+        twitterTitle: 'Video Generation Complete - Dancer',
+        twitterDescription: 'Your synchronized GIF and music video has been generated successfully. Download your creation or create another one.'
+      };
+    }
+    
+    return baseSeoData;
+  }
+
+  /**
+   * Handle server-side SEO injection for a route
+   * This should be called during server-side rendering to ensure meta tags are set
+   */
+  handleServerSideSeo(routePath: string, routeParams?: any): void {
+    const seoData = this.resolveSeoDataForRoute(routePath, routeParams);
+    this.injectMetaTagsForSSR(seoData);
+  }
+
+  /**
+   * Check if current execution is on server-side
+   */
+  isServerSide(): boolean {
+    return !isPlatformBrowser(this.platformId);
+  }
+
+  /**
+   * Get meta tags HTML for server-side injection
+   * This can be used to inject meta tags directly into the HTML response
+   */
+  getMetaTagsHtmlForRoute(routePath: string, routeParams?: any): string {
+    const seoData = this.resolveSeoDataForRoute(routePath, routeParams);
+    return this.generateMetaTagsHtml(seoData);
   }
 } 
