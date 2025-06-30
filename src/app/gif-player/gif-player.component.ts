@@ -2,7 +2,6 @@ import { Component, ElementRef, input, OnInit, viewChild, effect } from '@angula
 import { CommonModule } from '@angular/common';
 import { decompressFrames, ParsedFrame, parseGIF } from 'gifuct-js';
 import { GenerateGifService } from '../services/generate-gif.service';
-import { firstValueFrom } from 'rxjs';
 
 interface GifDimensions {
   width: number;
@@ -76,6 +75,7 @@ export class GifPlayerComponent implements OnInit {
 
       this.updateCanvasSize();
       this.playGif();
+      this.updateGifGenerationParams();
     }
   }
 
@@ -94,16 +94,14 @@ export class GifPlayerComponent implements OnInit {
     this.updateSliderIndicatorPosition();
   }
 
-  private async updateGifGenerationParams() {
+  private updateGifGenerationParams() {
     try {
-      const currentParams = await firstValueFrom(this.generateGifService.getGenerationParams());
-      if (currentParams) {
-        // gifSpeedValue already represents FPS directly
-        this.generateGifService.updateGenerationParams({
-          ...currentParams,
-          gifSpeed: this.gifSpeedValue
-        });
-      }
+      const currentParams = this.generateGifService.getCurrentParams();
+      // gifSpeedValue already represents FPS directly
+      this.generateGifService.updateGenerationParams({
+        ...currentParams,
+        gifSpeed: this.gifSpeedValue
+      });
     } catch (error) {
       console.error('Error updating GIF generation params:', error);
     }

@@ -27,7 +27,32 @@ export class GenerateGifService {
       gifSpeed: 30,
       audioUrl: ''
     };
-    this.generationParams.next({ ...current, ...params });
+    const updatedParams = { ...current, ...params };
+    if (params.gifSpeed !== undefined) {
+      console.log('updateGenerationParams - updating gifSpeed:', current.gifSpeed, '->', params.gifSpeed);
+    }
+    this.generationParams.next(updatedParams);
+  }
+
+  updateTimeParams(startTime: number, endTime: number, audioUrl: string) {
+    const current = this.generationParams.getValue() || {
+      startTime: 0,
+      endTime: 0,
+      gifSpeed: 30,
+      audioUrl: ''
+    };
+    const updatedParams = { 
+      ...current, 
+      startTime, 
+      endTime, 
+      audioUrl 
+    };
+    console.log('updateTimeParams - preserving gifSpeed:', current.gifSpeed, '->', updatedParams.gifSpeed);
+    this.generationParams.next(updatedParams);
+  }
+
+  getCurrentParams(): GifGenerationParams | null {
+    return this.generationParams.getValue();
   }
 
   getCurrentTimespan() {

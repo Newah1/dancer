@@ -72,9 +72,7 @@ export class AudioPlayerComponent {
   }
 
   handleSeekAdjustTime(time: number) {
-    console.log('handleSeekAdjustTime', time);
     if (this.audioElement?.nativeElement) {
-      console.log('time', time);
       this.audioElement.nativeElement.currentTime = time;
       this.currentTime = time;
     }

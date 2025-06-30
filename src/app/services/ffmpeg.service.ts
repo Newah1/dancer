@@ -32,7 +32,7 @@ export class FFmpegService {
     
     this.ffmpeg = new FFmpeg();
 
-    if (!isPlatformBrowser(this.platformId) || this.loaded || !this.ffmpeg) {
+    if (!isPlatformBrowser(this.platformId) || !this.ffmpeg) {
       console.log('Early return from load');
       return;
     }

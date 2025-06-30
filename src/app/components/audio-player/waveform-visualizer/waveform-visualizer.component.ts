@@ -69,6 +69,8 @@ export class WaveformVisualizerComponent implements AfterViewInit, OnChanges, On
       if (newTime < this.startBracketTime || newTime > this.endBracketTime) {
         this.seek.emit(this.startBracketTime);
       }
+      // Always redraw the waveform when currentTime changes to update the progress indicator
+      this.drawWaveform();
     }
   }
 
@@ -312,12 +314,11 @@ export class WaveformVisualizerComponent implements AfterViewInit, OnChanges, On
   }
 
   private updateGifGenerationParams() {
-
-    this.generateGifService.updateGenerationParams({
-      startTime: this.startBracketTime,
-      endTime: this.endBracketTime,
-      audioUrl: this.audioUrl || ''
-    });
+    this.generateGifService.updateTimeParams(
+      this.startBracketTime,
+      this.endBracketTime,
+      this.audioUrl || ''
+    );
   }
 
   private handleBracketDrag(x: number) {

@@ -4,6 +4,7 @@ import { FileUploadEvent, UploadComponent } from "src/app/upload.component";
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { GifPlayerComponent } from "src/app/gif-player/gif-player.component";
 import { GenerateGifService } from '../../services/generate-gif.service';
+import { FFmpegService } from '../../services/ffmpeg.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AudioPlayerComponent } from "../../components/audio-player/audio-player.component";
 import { ProgressIndicatorComponent } from "../../components/progress-indicator.component";
@@ -46,6 +47,7 @@ export class MediaSyncComponent {
 
     constructor(
         private generateGifService: GenerateGifService,
+        private ffmpegService: FFmpegService,
         private sanitizer: DomSanitizer,
         private router: Router,
         private route: ActivatedRoute
@@ -97,6 +99,13 @@ export class MediaSyncComponent {
         if (event.success && event.file) {
             this.musicFile = event.file;
             this.audioUrl = URL.createObjectURL(event.file);
+            
+            // Load ffmpeg in the background after successful audio upload
+            this.ffmpegService.load().then(() => {
+                console.log('FFmpeg loaded successfully in background');
+            }).catch((error) => {
+                console.error('Error loading FFmpeg in background:', error);
+            });
         } else {
             alert('Error uploading music file');
         }
@@ -107,6 +116,10 @@ export class MediaSyncComponent {
     }
 
     async generateVideo() {
+
+        // Load ffmpeg in the background after successful audio upload
+        await this.ffmpegService.load();
+
         if (!this.gifArrayBuffer || !this.musicFile) {
             return;
         }
