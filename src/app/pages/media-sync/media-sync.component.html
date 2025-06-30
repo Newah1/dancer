@@ -1,16 +1,28 @@
 <div class="gif-section" 
      appSeo
-     seoTitle="GIF & Music Synchronization Tool"
-     seoDescription="Sync your GIF animations with music perfectly. Upload your GIF and audio files to create synchronized videos with precise timing control."
-     seoKeywords="gif sync, music sync, video creation, animation sync, audio video sync, gif to video">
+     [seoTitle]="seoTitle ?? 'GIF & Music Synchronization Tool'"
+     [seoDescription]="seoDescription ?? 'Sync your GIF animations with music perfectly. Upload your GIF and audio files to create synchronized videos with precise timing control.'"
+     [seoKeywords]="seoKeywords ?? 'gif sync, music sync, video creation, animation sync, audio video sync, gif to video'">
   <div class="header">
     <h1 style="margin-bottom: 5px">Gif / Music Sync</h1>
     <h3 style="margin-top: 0">Sync your gif to music</h3>
   </div>
   
   @if(!generatingVideo) { 
-    @if (gifArrayBuffer) {
+    @if (loadingGif) {
+      <div class="loading-gif">
+        <p> Loading GIF...</p>
+        <app-progress-indicator></app-progress-indicator>
+      </div>
+    }
+
+    @if (gifArrayBuffer && !loadingGif) {
       <div class="gif-player-container">
+        @if (gifUrl) {
+          <div class="gif-source-info">
+            <small>GIF loaded</small>
+          </div>
+        }
         <app-gif-player
           [gifArrayBuffer]="gifArrayBuffer"
           [showControls]="true"
@@ -20,6 +32,7 @@
     }
 
     <app-upload
+      *ngIf="!gifUrl"
       class="gif-upload-box"
       (fileUploaded)="onGifUploaded($event)"
       [id]="'gif-upload-box'"

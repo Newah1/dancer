@@ -5,9 +5,9 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { GifPlayerComponent } from "src/app/gif-player/gif-player.component";
 import { GenerateGifService } from '../../services/generate-gif.service';
 import { DomSanitizer } from '@angular/platform-browser';
-import { AudioPlayerComponent } from "../audio-player/audio-player.component";
-import { ProgressIndicatorComponent } from "../progress-indicator.component";
-import { Router } from '@angular/router';
+import { AudioPlayerComponent } from "../../components/audio-player/audio-player.component";
+import { ProgressIndicatorComponent } from "../../components/progress-indicator.component";
+import { Router, ActivatedRoute } from '@angular/router';
 import { SeoDirective } from '../../directives/seo.directive';
 
 @Component({
@@ -34,12 +34,58 @@ export class MediaSyncComponent {
     startBracketTime = 0;
     endBracketTime = 0;
     generatingVideo = false;
+    loadingGif = false;
+
+    // Route data properties
+    gifUrl: string | null = null;
+    gifId: string | null = null;
+
+    seoTitle: string | null = null;
+    seoDescription: string | null = null;
+    seoKeywords: string | null = null;
 
     constructor(
         private generateGifService: GenerateGifService,
         private sanitizer: DomSanitizer,
-        private router: Router
-    ) {}
+        private router: Router,
+        private route: ActivatedRoute
+    ) {
+        // Access route data
+        this.route.data.subscribe(data => {
+            this.gifUrl = data['url'];
+            
+            this.seoTitle = data['seoTitle'];
+            this.seoDescription = data['seoDescription'];
+            this.seoKeywords = data['seoKeywords'];
+            console.log('GIF URL:', this.gifUrl); // 'gif' for /gif/:id routes
+            
+            // If GIF URL is provided, automatically load the GIF
+            if (this.gifUrl) {
+                this.loadGifFromUrl(this.gifUrl);
+            }
+        });
+    }
+
+    private async loadGifFromUrl(url: string): Promise<void> {
+        try {
+            this.loadingGif = true;
+            console.log('Loading GIF from URL:', url);
+            
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch GIF: ${response.status} ${response.statusText}`);
+            }
+            
+            const arrayBuffer = await response.arrayBuffer();
+            this.gifArrayBuffer = arrayBuffer;
+            console.log('GIF loaded successfully from URL');
+        } catch (error) {
+            console.error('Error loading GIF from URL:', error);
+            // You might want to show a user-friendly error message here
+        } finally {
+            this.loadingGif = false;
+        }
+    }
 
     async onGifUploaded(event: FileUploadEvent): Promise<void> {
         if (event.success && event.file) {
